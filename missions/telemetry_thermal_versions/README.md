@@ -21,7 +21,7 @@ Figure 3 depicts the network diagram of the project. In this setup, the Raspberr
 </figure>
 
 <figure>
-    <img src="./figures/new_setup.jpg" alt="Figure 2">
+    <img src="figures/new_setup.jpg" alt="Figure 2">
     <figcaption>Figure 2: New Setup</figcaption>
 </figure>
 
