@@ -4,8 +4,8 @@ To run the script you'll need to install Olympe. To do so follow the set up guid
 
 You will also need to install python on your machine. This following guide will help install python on whatever system you are using. (https://kinsta.com/knowledgebase/install-python/#linux)
 
-Another essential requirement is installing airsdk onto your system. (https://airsdk.dev/docs/basics/install/windows)
-Drone Automation Services
+Another essential requirement is installing Air SDK 7.7 onto your system. (https://airsdk.dev/docs/basics/install/windows)
+
 # Drone Automation Services
 For the drone to make it's own movement commands, it uses the following services named "go_to" and "trajectory_determination".
 
