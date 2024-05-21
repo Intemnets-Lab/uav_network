@@ -1,0 +1,28 @@
+#     This file is part of telemetry_thermal_versions.
+
+#    telemetry_thermal_versions is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+#    telemetry_thermal_versions is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+#    GNU General Public License: <https://www.gnu.org/licenses/>.
+
+api_version: 1
+kind: Mission
+metadata:
+  uid: com.parrot.missions.samples.telemetry_py
+  name: telemetry_py
+  description: telemetry python example mission
+  version: "1.0.0"
+  target_model_id: 091A
+  target_min_version: "7.7.0"
+  target_max_version: "7.7.99"
+pip:
+  requirements:
+    - paramiko
+    - scp
+    - pyserial
+    - XBee
+    - digi-xbee
+services:
+  example_telemetry:
+    lang: python
