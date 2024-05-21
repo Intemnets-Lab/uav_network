@@ -13,17 +13,19 @@ At the beginning you must have the drone on with it's wings extended and placed 
 
 To run the services and have the drone take off, you need to build and install the "moveby" mission into the device. From the computer's terminal, you need to navigate into the mission folder labeled "move" and run the command
 
+```bash
 airsdk build && airsdk uninstall com.parrot.missions.samples.move && airsdk install --default 
-
+```
 This command uninstalls the exsisting move mission from the drone, then builds and installs a new one as the default with all the code in this folder. If no move mission exists yet, then just enter.
-
+```bash
 airsdk build && airsdk install --default 
-
+```
 Make sure the mission you install has these service folders labeled correctly. Since it's set to default the mission will automaticly activate when the installtion is done, however the drone won't take off.
 
 To get the drone in the air, from the terminal you need to command into the Olympe folder and execute the script "missiontestland.py" in a python3 shell.
-testland.py
-
+```bash
+python3 missiontestland.py
+```
 The script has only one command, to forcefully make the drone either take off or land depending on it's current state. Once in the air the mission will begin to execute it's flight commands. The same script needs to be ran again to make the drone land once it executed all of it's movement commands. You'll know when the final movement command is done when the drone just stays suspended in the air instead of executing another command 5-10 seconds after the last.
 
 Note: If the mission fails to build, that usually indicates an error in the code. Look at where the error is located to find and resolve the issue. Any error that pops up that mentions "media" hasn't appeared to stop the drone from executing it's flight plan, so keep that in mind.
