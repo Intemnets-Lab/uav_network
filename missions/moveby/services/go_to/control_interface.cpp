@@ -39,6 +39,14 @@ ULOG_DECLARE_TAG(ULOG_TAG);
 #include <string>
 #include <unistd.h>
 #include <sstream>
+#define status_wait_time 5
+#define waypoint_wait_time 5
+#define WAYCHECK "/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.move/waypointcheck.txt"
+#define STATUS "/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.move/statusfile.txt"
+#define WAYPOINT "/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.move/waypointfile.txt"
+#define CONFIRM "/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.move/confirmheader.txt"
+#define STATUSCONFIRM1 "/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.move/statusconfirm1.txt"
+#define STATUSCONFIRM2 "/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.move/statusconfirm2.txt"
 
 #include "control_interface.hpp"
 
@@ -312,40 +320,38 @@ int ControlInterface::onCmdReceived(const arsdk_cmd *cmd)
 		      realTrajectory.heading,
 		      state);
 		if (state == ARSDK_ARDRONE3_PILOTINGEVENT_MOVEBYEND_ERROR_OK) {
-			// cmdMoveBy({.dx = 0, .dy = 0, .dz = 0},0.8);
+			//const int wait_time = 5;
 			std::ifstream statusfile;
-			//The service tries to open the status file.
+			//The go_to service tries to open the status file. Use a while loop to constantly try to open the file.
 			while (1){
-				statusfile.open("/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.move/statusfile.txt");
+				statusfile.open(STATUS);
 				if(!statusfile.is_open()){
 
-					sleep(5);
+					sleep(status_wait_time);
 				}
 				else{
-					break;// breaks the while loop if there was no issue openingtne file 
+					break;// breaks the while loop if there was no issue opening the file 
 				}
 			}
-			std::ofstream MyFile("/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.move/statusconfirm1.txt");
-    		MyFile << "was able to get the status value first time1\n";// confirm to have gotten status
-
+			std::ofstream MyFile(STATUSCONFIRM1);
+    		MyFile << "was able to get the status value first time1\n";// File to confirm to have the status value
 			std::string stringstatus="";
 			getline(statusfile,stringstatus);
 			MyFile << stringstatus;
-			MyFile << "was able to get the status value first time3\n";
 			MyFile.close();
 			int status = std::stoi(stringstatus);
 			statusfile.close();
-			//check the current state of status, if 0 then attempted to open the heading file
+			//check the current state of status, if it's 0 then the service attempts to open the heading file
 			if(status==0){
-				std::ofstream MyFile("/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.move/confirmheader.txt");
-    			MyFile << "was able to get the header value\n";
+				std::ofstream MyFile(CONFIRM);
+    			MyFile << "was able to confirm the waypoint value\n";
     			MyFile.close();
 				std::ifstream headingfile;
-				//We add while loop to make sure the heading file is properly opened. Then read and use the heading value.
+				//The service uses a  while loop to make sure the waypoint file is properly opened. Then read and use the waypoint value.
 				while(1){
-					headingfile.open("/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.move/waypointfile.txt");
+					headingfile.open(WAYPOINT);
 					if(!headingfile.is_open()){
-						sleep(5);
+						sleep(waypoint_wait_time);
 					}
 					else{
 						break;
@@ -353,6 +359,7 @@ int ControlInterface::onCmdReceived(const arsdk_cmd *cmd)
 				}
 				std::string headingstring="";
 				float value1,value2,value3,value4;
+				//The service reads the waypoint value and breaks it down into 4 variables
 				while(getline (headingfile, headingstring)){
 					std::stringstream ss(headingstring);
 					char comma;
@@ -366,9 +373,9 @@ int ControlInterface::onCmdReceived(const arsdk_cmd *cmd)
 				headingfile.close();
 				// change status file
 				while(1){
-					std::ofstream changestatus("/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.move/statusfile.txt");
+					std::ofstream changestatus(STATUS);
 					if(!changestatus.is_open()){
-						sleep(5);
+						sleep(status_wait_time);
 					}
 					else{
 						changestatus << "1";
@@ -376,29 +383,30 @@ int ControlInterface::onCmdReceived(const arsdk_cmd *cmd)
 						break;
 					}
 				}
-				// read from the waypoint file
-				std::ofstream WayFile("/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.move/waypointcheck.txt");
+				// write the waypoint values to a check to check and confirm they are as expected.
+				std::ofstream WayFile(WAYCHECK);
 				WayFile << value1 << ", " << value2 << ", "<< value3 << ", " << value4 << "\n";
 				WayFile.close();
 				// confirm the the status was changed 
-				std::ofstream openFile("/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.move/statusconfirm2.txt");
+				std::ofstream openFile(STATUSCONFIRM2);
     			openFile << "was able to change status value time\n";
     			openFile.close();
-				//check the value of heading
+				//check the value of waypoint and run the corresponding moveby command.
 				if(value1>=0.0 && value1<6.28){
 					cmdMoveBy({.dx = 0, .dy = 0, .dz = 0},value1);
 				}
 				else{
+					//if the value is out of bounds, run a move command with 0
 					sleep(5);
 					cmdMoveBy({.dx = 0, .dy = 0, .dz = 0},0);
 				}
 			}
 			else{
-				//if status is 1 we wait until status is 0. In the mean while cmdMoveBy() will run with a general 
-				std::ofstream MyFile("/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.move/confirmheader.txt");
+				//if status is 1 we wait until status is 0. In the mean while cmdMoveBy() will run with a zero value.
+				std::ofstream MyFile(CONFIRM);
     			MyFile << "was not able to get the header value";
     			MyFile.close();
-				sleep(5);
+				sleep(wait_time);
 				cmdMoveBy({.dx = 0, .dy = 0, .dz = 0},0);
 			}
 				
