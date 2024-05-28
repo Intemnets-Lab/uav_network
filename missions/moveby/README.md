@@ -48,3 +48,4 @@ Each cpp file will also have an associated hpp file.
 
 # trajectory_determination
 main.py - Has the main code loop for the python service. It read from files shared between it and the move_along service to decided on the next steps to take.
+The service is programmed with 4 total movement commands, making the drone rotate to the right 180 degrees, left 180 degrees, to the right 90 degrees, then to the left another 90 degrees.
