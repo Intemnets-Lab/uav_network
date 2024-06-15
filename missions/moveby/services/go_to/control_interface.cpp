@@ -406,7 +406,7 @@ int ControlInterface::onCmdReceived(const arsdk_cmd *cmd)
 				std::ofstream MyFile(CONFIRM);
     			MyFile << "was not able to get the header value";
     			MyFile.close();
-				sleep(wait_time);
+				sleep(waypoint_wait_time);
 				cmdMoveBy({.dx = 0, .dy = 0, .dz = 0},0);
 			}
 				
