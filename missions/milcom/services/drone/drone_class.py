@@ -14,11 +14,6 @@ from digi.xbee.models.address import XBee64BitAddress
 import struct
 
 PATH_DATA = "/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.milcom/telemetry_data.csv"
-# PATH_GUIDANCE = "/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.milcom/drone1cofirm.txt"
-# PATH_HEADINGTEST = "/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.milcom/statusCHECK.txt"
-# PATH_COOR = "/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.milcom/coortest.txt"
-# PATH_SERVICE = "/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.milcom/telemetry_service.txt" #new #while true; do cat telemetry_service.txt | wc -l; sleep 5; done
-# PATH_TEST = "/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.milcom/telemetry_test.txt"
 PATH_CHECK = "/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.milcom/datatest.txt"
 PATH_SOCKET = "/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.milcom/socket_python.txt"
 PATH_ERROR = "/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.milcom/errorcheck.txt"
@@ -33,26 +28,6 @@ class Drone:
         file.write("Time, Altitude, Drone Roll, Drone Pitch, Drone Yaw, Gimbal Roll, Gimbal Pitch, Gimbal Yaw, GPS Latitude, GPS Longitude, GPS Altitude, GPS Satellites\n")
 
     def __init__(self, port, baud_rate, drone_id, mode, drone_type, next_hop_address,status):
-
-        # """
-        # Initialize the XBeeHandler with a given port, baud rate, and device name.
-        # """
-        # self.status = status
-        # self.drone_type = drone_type
-        # self.mode = mode
-        # self.xbee_radio = XBeeDevice(port, baud_rate)
-        # self.drone_id = drone_id
-        # # self.broadcast_message = f"Hello from {self.drone_id}!"
-        # self.xbee_radio.open()
-        # self.next_hop_address = next_hop_address
-
-        # try:
-        #     self.s.bind(('127.0.0.1', self.port))
-        # except Exception as e:
-        #     with open(PATH_ERROR,"w") as file:
-        #         file.write(f"error occurred: {e} ")
-
-
         # Setup Consumer
         self.consumer = telemetry_binding.Consumer("/dev/shm")
         # Setup Sensors
@@ -91,21 +66,7 @@ class Drone:
         self.waypointcounter = 0
         self.status = "HOVERING"
       
-        # """
-        # Start threads that drive all operations
-        # """
-        # threading.Thread(target=self.process_received_messages, daemon=True).start()
-        # threading.Thread(target=self.print_waiting_message, daemon=True).start()
-        # threading.Thread(target=self.send_broadcast_messages_randomly, daemon=True).start()
-        # threading.Thread(target=self.switch_mode_periodically, daemon=True).start()
-        # if  self.drone_type == "Coordinator":
-        #     self.token_timeout = 10
-        #     self.token_received = False
-        #     self.counter = 0  # Initialize counter
-        #     self.token_timer = threading.Timer(self.token_timeout, self.generate_token)
-        #     self.token_timer.start()
-
-        #Intialize port
+        #Intialize socket
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.port = 2000
         self.s.bind(('127.0.0.1', self.port))
@@ -115,15 +76,13 @@ class Drone:
 
         threading.Thread(target=self.main_loop, daemon=True).start()
 
-        #xbee
+        # Initialize the XBeeHandler with a given port, baud rate, and device name.
         self.xbee_radio = XBeeDevice("/dev/ttyUSB0", 9600)
         try:
             self.xbee_radio.open()
         except Exception as e:
             with open("/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.milcom/xbee_log.txt", "a") as log_file:
                 log_file.write(f"[XBee INIT ERROR] {e}\n")
-
-        
 
     def main_loop(self):
         #main loop where we take a photo, collect data
@@ -230,9 +189,6 @@ class Drone:
                 try:
                     if self.check_remote_file_exists(ssh_client, currentTime):
                         self.scp_transfer_file(ssh_client, currentTime, local_path)
-                        # with open(PATH_TEST, 'a') as testfile:#new
-                            # testfile.write("telemetry_py example mission service\n")
-                        # await asyncio.sleep(1)
                         break
                         #check to see if the file is available locally and you dont continue until its there locally
                         #transmit floating point numbers
@@ -280,6 +236,7 @@ class Drone:
     def test_xbee(self):
         #send data using the xbee_radio
         try:
+            #reopen the port if it got closed for any reason
             if not self.xbee_radio.is_open():
                 self.xbee_radio.open()
             data1 = 1.0
@@ -295,135 +252,3 @@ class Drone:
         except Exception as e:
             with open("/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.milcom/xbee_log.txt", "a") as log_file:
                 log_file.write(f"[XBee] Error {e}\n")
-
-
-    # def generate_token(self):
-    #     if self.mode == "Updating":
-    #         print("Timeout: no data received")
-    #         self.counter = 0
-    #         # Send data again after timeout
-    #         float_data1 = 3.14  # Replace with your first float value
-    #         float_data2 = 2.71  # Replace with your second float value
-    #         self.transmit_to_next_hop(float_data1, float_data2)
-    #     self.token_timer = threading.Timer(self.token_timeout, self.generate_token)
-    #     self.token_timer.start()
-       
-        
-    # def transmit_to_next_hop(self, data1, data2):
-    #     try:
-    #         # Convert two floats to bytes
-    #         data_bytes = struct.pack(">ff", data1, data2)
-    #         print("preparing to send data")
-    #         next_hop = RemoteXBeeDevice(self.xbee_radio, XBee64BitAddress.from_hex_string(self.next_hop_address))
-    #         print("remote xbee device created")
-    #         self.xbee_radio.send_data(next_hop, data_bytes)
-    #         print("Data sent from coordinator: {data1}, {data2}")
-    #     except Exception as e:
-    #         print("Error2: {e}")
-
-
-    # def receive_from_previous_hop(self):
-    #     try:
-    #         data = self.xbee_radio.read_data(1000)
-    #         if data is not None:
-    #             # Unpack bytes to two floats
-    #             if len(data.data)>=8:
-    #                 data_tuple = struct.unpack(">ff", data.data[:8])
-    #                 return data_tuple
-    #             # print("data read sucessfully")
-    #             # return data_tuple
-    #     except Exception as e:
-    #         print("Error3: {e}")
-    #     return None
-    
-
-    # def transmit_broadcast(self, drone_id_float):
-    #     """
-    #     Broadcast a message to all devices in the XBee network.
-    #     Includes a timestamp in the printed message for verification.
-    #     """
-    #     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    #     while True:
-    #         try:
-    #             with open(PATH_GUIDANCE, 'a') as broadfile:#new
-    #                 broadfile.write(f"{current_time} - Broadcasting message from {self.drone_id}: '{drone_id_float}'\n")
-    #         except:
-    #             #wait five seconds before trying again.
-    #             asyncio.sleep(3)
-    #         else:
-    #             break
-    #     print(f"{current_time} - Broadcasting message from {self.drone_id}: '{drone_id_float}'")
-    #     broadcast_device = RemoteXBeeDevice(self.xbee_radio, XBee64BitAddress.BROADCAST_ADDRESS)
-    #     data_bytes = struct.pack(">f", drone_id_float)
-    #     self.xbee_radio.send_data_async(broadcast_device, data_bytes)
-    # def process_received_messages(self):
-    #     """
-    #     Continuously process and print any received messages.
-    #     Includes a timestamp in the printed message for verification.
-    #     """
-    #     while True:
-    #         if self.mode == "Monitoring":
-    #             try:
-    #                 message = self.xbee_radio.read_data(1)
-    #                 if message is not None:
-    #                     source_address = message.remote_device.get_64bit_addr()
-    #                     received_data = struct.unpack(">f", message.data[:4])[0]
-    #                     current_time = datetime.now().strftime("%m_%d_%Y_%H:%M:%S")
-    #                     with open(PATH_GUIDANCE, 'a') as file:#new111
-    #                         file.write(f"{current_time} - Message received from {source_address} ({self.drone_id}): {received_data}\n")
-    #                         print(f"{current_time} - Message received from {source_address} ({self.drone_id}): {received_data}")
-    #                     # self.goto()
-    #                     # self.photo(self.server, self.nport, self.user, self.password, self.local_path, current_time)
-    #                     self.get_telemetry(self.consumer, self.drone_attitude_x, self.drone_attitude_y, self.drone_attitude_z, self.drone_attitude_w, self.gimbal_attitude_x, self.gimbal_attitude_y, self.gimbal_attitude_z, self.gimbal_attitude_w,self.gps_latitude, self.gps_longitude, self.gps_altitude, self.gps_satellites, self.altitude, current_time)
-    #                     # self.addsnap(self.local_path, self.current_time)
-    #             except Exception as e:
-    #                 if "timeout" not in str(e):
-    #                     print(f"Error: {e}")
-    #         elif self.mode=="Updating" and self.drone_type=="Coordinator":
-    #             received_float_data = self.receive_from_previous_hop()
-    #             if received_float_data:
-    #                 print("coordinator received float data: {}, {}".format(received_float_data[0], received_float_data[1]))
-    #                 # Send data again after receiving
-    #                 # float_data1 = 3.14  
-    #                 # float_data2 = 2.71  
-    #                 self.transmit_to_next_hop(received_float_data[0], received_float_data[1])
-    #                 self.token_timer.cancel()
-    #                 self.token_timer.start()
-    #                 self.counter = self.counter+1
-    #                 print("Round completed. Counter value:", self.counter)
-    #         else:
-    #             received_float_data= self.receive_from_previous_hop()
-    #             if received_float_data:
-    #                 print("router received float data: {}, {}".format(received_float_data[0], received_float_data[1]))
-    #                 time.sleep(1)
-    #                 float_data1 = 3.14  
-    #                 float_data2 = 2.71 
-    #                 self.transmit_to_next_hop(float_data1,float_data2)
-    #         time.sleep(1)
-
-
-    # def print_waiting_message(self):
-    #     """
-    #     Continuously print a waiting message to indicate the device is ready to receive messages.
-    #     """
-    #     while True:
-    #         print(f"Waiting for messages at {self.drone_id}...")
-    #         time.sleep(1)
-
-
-    # def send_broadcast_messages_randomly(self):
-    #     """
-    #     Send broadcast messages at random intervals.
-    #     """
-    #     while True:
-    #         if self.mode == "Monitoring":
-    #             drone_id_float = float(self.drone_id)
-    #             self.transmit_broadcast(drone_id_float)
-    #         random_interval = 10
-    #         time.sleep(random_interval)
-
-    # def switch_mode_periodically(self):
-    #     while True:
-    #         time.sleep(300)
-    #         self.mode= "Monitoring" if self.mode=="Updating" else "Updating"
-    #         print(f"mode switched to {self.mode} for {self.drone_id}")
