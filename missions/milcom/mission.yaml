@@ -1,0 +1,31 @@
+api_version: 1
+kind: Mission
+metadata:
+  uid: com.parrot.missions.samples.milcom
+  name: milcom
+  description: Move the drone along a certain trajectory without using a guidance mode.
+  version: "1.0.0"
+  target_model_id: 091A
+  target_min_version: "7.7.0"
+  target_max_version: "7.7.99"
+pip:
+  requirements:
+    - paramiko
+    - scp
+    - pyserial
+    - XBee
+    - digi-xbee
+    # - matplotlib
+services:
+  go_to:
+    lang: c++
+    depends:
+      - libairsdk
+      - libarsdk
+      - libarsdkctrl
+      - libarsdkgen
+      - libconfigreader
+  drone:
+    lang: python
+
+    
