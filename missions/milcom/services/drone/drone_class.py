@@ -24,8 +24,8 @@ class Drone:
     user = 'intemnetslab'
     password = '1357924680'
     local_path = '/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.milcom/'
-    with open(PATH_DATA, 'w') as file:
-        file.write("Time, Altitude, Drone Roll, Drone Pitch, Drone Yaw, Gimbal Roll, Gimbal Pitch, Gimbal Yaw, GPS Latitude, GPS Longitude, GPS Altitude, GPS Satellites\n")
+    #with open(PATH_DATA, 'w') as file:
+        #file.write("Time, Altitude, Drone Roll, Drone Pitch, Drone Yaw, Gimbal Roll, Gimbal Pitch, Gimbal Yaw, GPS Latitude, GPS Longitude, GPS Altitude, GPS Satellites\n")
 
     def __init__(self, port, baud_rate, drone_id, mode, drone_type, next_hop_address,status):
         # Setup Consumer
@@ -81,8 +81,9 @@ class Drone:
         try:
             self.xbee_radio.open()
         except Exception as e:
-            with open("/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.milcom/xbee_log.txt", "a") as log_file:
-                log_file.write(f"[XBee INIT ERROR] {e}\n")
+            print(f"[XBee INIT ERROR] {e}\n")
+            #with open("/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.milcom/xbee_log.txt", "a") as log_file:
+                #log_file.write(f"[XBee INIT ERROR] {e}\n")
 
     def main_loop(self):
         #main loop where we take a photo, collect data
@@ -106,13 +107,14 @@ class Drone:
         while True:
             try:
                 client_socket, addr = self.s.accept()
-                with open(PATH_SOCKET, 'a') as log:
-                    log.write(f"[Socket] Client connected: {addr}\n")
+                #with open(PATH_SOCKET, 'a') as log:
+                    #log.write(f"[Socket] Client connected: {addr}\n")
                 # Start a new daemon thread to handle communication with this client
                 threading.Thread(target=self.handle_client, args=(client_socket,), daemon=True).start()
             except Exception as e:
-                with open(PATH_ERROR, 'a') as log:
-                    log.write(f"[Socket] Accept failed: {e}\n")
+                print(f"[Socket] Accept failed: {e}\n")
+                #with open(PATH_ERROR, 'a') as log:
+                    #log.write(f"[Socket] Accept failed: {e}\n")
 
     def handle_client(self, client_socket):
         try:
@@ -120,8 +122,8 @@ class Drone:
                 data = client_socket.recv(1024).decode().strip()
                 if not data:
                     break
-                with open(PATH_SOCKET, 'a') as log:
-                    log.write(f"[Socket] Received: {data}\n")
+                #with open(PATH_SOCKET, 'a') as log:
+                    #log.write(f"[Socket] Received: {data}\n")
 
                 #Figure out what command was sent
                 if data == "GET_WAYPOINT":
@@ -141,17 +143,17 @@ class Drone:
                     else:
                         client_socket.sendall(b"INVALID_STATUS\n")
 
-        except Exception as e:
-            with open(PATH_ERROR, 'a') as log:
-                log.write(f"[Socket] Error: {e}\n")
+        #except Exception as e:
+            #with open(PATH_ERROR, 'a') as log:
+                #log.write(f"[Socket] Error: {e}\n")
         finally:
             client_socket.close()
-            with open(PATH_SOCKET, 'a') as log:
-                log.write("[Socket] Client disconnected\n")
+            #with open(PATH_SOCKET, 'a') as log:
+                #log.write("[Socket] Client disconnected\n")
 
     def get_waypoint(self):
-        with open(PATH_SOCKET, 'a') as log:
-            log.write(f"[DEBUG] Waypoint counter: {self.waypointcounter}, Total: {len(self.waypoints)}\n")
+        #with open(PATH_SOCKET, 'a') as log:
+            #log.write(f"[DEBUG] Waypoint counter: {self.waypointcounter}, Total: {len(self.waypoints)}\n")
         if self.waypointcounter < len(self.waypoints):
             wp = self.waypoints[self.waypointcounter]
             return wp
@@ -230,8 +232,8 @@ class Drone:
         drone_roll, drone_pitch, drone_yaw = self.euler_from_quaternion(float(drone_attitude_x), float(drone_attitude_y), float(drone_attitude_z), float(drone_attitude_w))
         gimbal_roll, gimbal_pitch, gimbal_yaw = self.euler_from_quaternion(float(gimbal_attitude_x), float(gimbal_attitude_y), float(gimbal_attitude_z), float(gimbal_attitude_w))
         data_string = f"{currentTime},{altitude},{drone_roll},{drone_pitch},{drone_yaw},{gimbal_roll},{gimbal_pitch},{gimbal_yaw},{gps_latitude},{gps_longitude},{gps_altitude},{gps_satellites}\n"
-        with open(PATH_DATA, 'a') as file:
-            file.write(data_string)
+        #with open(PATH_DATA, 'a') as file:
+            #file.write(data_string)
     
     def test_xbee(self):
         #send data using the xbee_radio
@@ -247,8 +249,9 @@ class Drone:
             self.xbee_radio.send_data(broadcast_device, data_bytes)
 
             #debug
-            with open("/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.milcom/xbee_log.txt", "a") as log_file:
-                log_file.write("[XBee] Data sent successfully.\n")
+            #with open("/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.milcom/xbee_log.txt", "a") as log_file:
+                #log_file.write("[XBee] Data sent successfully.\n")
         except Exception as e:
-            with open("/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.milcom/xbee_log.txt", "a") as log_file:
-                log_file.write(f"[XBee] Error {e}\n")
+            print(f"[XBee] Error {e}\n")
+            #with open("/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.milcom/xbee_log.txt", "a") as log_file:
+                #log_file.write(f"[XBee] Error {e}\n")

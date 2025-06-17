@@ -48,7 +48,7 @@ Each cpp file will also have an associated hpp file.
 # drone
 main.py - This is the main entry point for the mission. It initializes and launches the drone logic by creating an instance of the Drone class.
 
-drone_class.py - Contains the main logic for autonomous drone operations within the mission. Handles all major functionalities of the drone, including telemetry data collection, waypoint navigation, thermal photo capture through SSH to a remote Raspberry Pi, and communication using XBee radios. It also handle socket communication and waypoint progression to the control_interface.cpp.
+drone_class.py - Contains the main logic for autonomous drone operations within the mission. Handles all major functionalities of the drone, including telemetry data collection, waypoint navigation, photo capture through SSH to a remote Raspberry Pi, and communication using XBee radios. It also handle socket communication and waypoint progression to the control_interface.cpp.
 
 way.py - The waypoints are stored here.
 

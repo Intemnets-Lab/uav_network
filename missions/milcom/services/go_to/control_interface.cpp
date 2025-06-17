@@ -412,10 +412,10 @@ int ControlInterface::onCmdReceived(const arsdk_cmd *cmd)
                         std::stringstream ss(string_waypoint);
 
 						//debug waypoints + socket in a file
-                        std::ofstream waypointFile("/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.milcom/waypoint_socket.txt", std::ios::app);
-                        waypointFile << string_waypoint << "\n";
-                        waypointFile << status << "\n";
-                        waypointFile.close();
+                        //std::ofstream waypointFile("/mnt/user-internal/missions-data-tmp/com.parrot.missions.samples.milcom/waypoint_socket.txt", std::ios::app);
+                        //waypointFile << string_waypoint << "\n";
+                        //waypointFile << status << "\n";
+                        //waypointFile.close();
 						
 						//parse waypoints into float vars
                         float headingRotation, dx, dy, dz;
